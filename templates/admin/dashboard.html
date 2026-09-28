@@ -4,21 +4,21 @@
 
 {% block content %}
 <div class="admin-header">
-  <div class="nav-container" style="padding-top:0; padding-bottom:0;">
+  <div class="nav-container">
     <div>
-      <h2 style="font-size:1.75rem; font-weight:800; color:var(--text-main);">Teacher Dashboard</h2>
-      <p style="color:var(--text-muted); font-size:0.9rem;">
-        Manage notes, upload new question banks to GCS (<code>{{ bucket_name }}/{{ folder_prefix }}</code>), and publish announcements.
+      <h2 style="font-size:1.45rem; font-weight:800; color:var(--text-main);">Teacher Dashboard</h2>
+      <p style="color:var(--text-muted); font-size:0.82rem; margin-top:0.2rem;">
+        GCS Storage: <code>{{ bucket_name }}/{{ folder_prefix }}</code>
       </p>
     </div>
-    <div style="display:flex; gap:0.75rem;">
+    <div class="admin-header-actions">
       <a href="#upload-section" class="btn btn-primary btn-sm">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        Upload New Material
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Upload File
       </a>
       <a href="{{ url_for('index') }}" target="_blank" class="btn btn-secondary btn-sm">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-        View Public Site
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        Public Site
       </a>
     </div>
   </div>
@@ -26,58 +26,58 @@
 
 <main class="main-content" style="padding-top:0;">
 
-  <!-- Stats Grid -->
+  <!-- Stats Grid (2x2 on Mobile, 4-col on Desktop) -->
   <div class="stats-grid">
     <div class="stat-card green">
       <div class="stat-icon">&#128196;</div>
       <div class="stat-details">
         <h4>{{ total_materials }}</h4>
-        <span>Study Materials</span>
+        <span>Study Notes</span>
       </div>
     </div>
     <div class="stat-card blue">
       <div class="stat-icon">&#11015;</div>
       <div class="stat-details">
         <h4>{{ total_downloads }}</h4>
-        <span>Total Student Downloads</span>
+        <span>Downloads</span>
       </div>
     </div>
     <div class="stat-card amber">
       <div class="stat-icon">&#128227;</div>
       <div class="stat-details">
         <h4>{{ announcements|length }}</h4>
-        <span>Live Announcements</span>
+        <span>Notices</span>
       </div>
     </div>
     <div class="stat-card purple">
       <div class="stat-icon">&#9729;</div>
       <div class="stat-details">
-        <h4 style="font-size:1.25rem;">{{ bucket_name }}</h4>
-        <span>GCS Bucket Connected</span>
+        <h4 style="font-size:1.05rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ bucket_name }}</h4>
+        <span>GCS Connected</span>
       </div>
     </div>
   </div>
 
   <!-- UPLOAD SECTION -->
   <div class="admin-card" id="upload-section">
-    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; border-bottom:1px solid var(--light-border); padding-bottom:1rem;">
-      <div style="width:36px; height:36px; background:var(--primary-light); color:var(--primary-dark); border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1.25rem; border-bottom:1px solid var(--light-border); padding-bottom:0.75rem;">
+      <div style="width:34px; height:34px; background:var(--primary-light); color:var(--primary-dark); border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
       </div>
       <div>
-        <h3 style="font-size:1.25rem; font-weight:700;">Upload New Study Material</h3>
-        <p style="font-size:0.82rem; color:var(--text-muted);">Directly uploads and syncs to Google Cloud Storage (PDF, DOCX, PNG, JPG)</p>
+        <h3 style="font-size:1.15rem; font-weight:700;">Upload New Material</h3>
+        <p style="font-size:0.78rem; color:var(--text-muted);">Syncs to Google Cloud Storage (PDF, DOCX, Images)</p>
       </div>
     </div>
 
     <form method="POST" action="{{ url_for('admin_upload') }}" enctype="multipart/form-data">
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" for="title">Document / Resource Title *</label>
-          <input type="text" id="title" name="title" class="form-control" placeholder="e.g., Chapter 5 - Principles of Inheritance Quick Revision" required>
+          <label class="form-label" for="title">Title *</label>
+          <input type="text" id="title" name="title" class="form-control" placeholder="e.g., Chapter 5 - Genetics Quick Notes" required>
         </div>
         <div class="form-group">
-          <label class="form-label" for="grade">Target Grade / Class *</label>
+          <label class="form-label" for="grade">Target Grade *</label>
           <select id="grade" name="grade" class="form-select" required>
             <option value="Class 12" selected>Class 12</option>
             <option value="Class 11">Class 11</option>
@@ -90,11 +90,11 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" for="chapter">Unit / Chapter Name *</label>
-          <input type="text" id="chapter" name="chapter" class="form-control" placeholder="e.g., Genetics & Evolution, Cell Biology, Human Physiology" required>
+          <label class="form-label" for="chapter">Chapter / Topic *</label>
+          <input type="text" id="chapter" name="chapter" class="form-control" placeholder="e.g., Genetics, Human Physiology" required>
         </div>
         <div class="form-group">
-          <label class="form-label" for="category">Resource Type / Category *</label>
+          <label class="form-label" for="category">Category *</label>
           <select id="category" name="category" class="form-select" required>
             <option value="Revision Notes" selected>Revision Notes</option>
             <option value="Question Bank & PYQs">Question Bank & PYQs</option>
@@ -105,43 +105,86 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="description">Short Summary / Highlights (Optional)</label>
-        <textarea id="description" name="description" class="form-textarea" rows="2" placeholder="e.g., Covers Mendel's Laws, Punnett squares, and past 10-year board questions..."></textarea>
+        <label class="form-label" for="description">Summary / Notes (Optional)</label>
+        <textarea id="description" name="description" class="form-textarea" rows="2" placeholder="Brief summary for students..."></textarea>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Select File to Upload *</label>
+        <label class="form-label">Select File *</label>
         <div class="file-dropzone" onclick="document.getElementById('file-input').click()">
           <input type="file" id="file-input" name="file" style="display:none;" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png" required>
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" style="margin-bottom:0.5rem;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-          <p class="file-name-label" style="font-size:0.95rem; color:#334155;">Click to choose PDF or Drag & Drop file here</p>
-          <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.25rem;">Supported formats: PDF, Word, PowerPoint, Images (Max 100MB)</p>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" style="margin-bottom:0.35rem;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          <p class="file-name-label" style="font-size:0.9rem; font-weight:600; color:#334155;">Tap to Choose File / PDF</p>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">PDF, Word, Images (Max 100MB)</p>
         </div>
       </div>
 
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem;">
-        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-size:0.9rem; font-weight:600;">
+      <div style="margin: 1rem 0;">
+        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-size:0.85rem; font-weight:600;">
           <input type="checkbox" name="is_pinned" value="1">
-          <span>Pin / Highlight this resource at the top of the student portal</span>
+          <span>Feature / Pin to Top of Home Page</span>
         </label>
-        <button type="submit" class="btn btn-primary">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          Upload & Publish
-        </button>
       </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%; min-height:48px; font-size:0.95rem;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Upload & Publish Material
+      </button>
     </form>
   </div>
 
-  <!-- MANAGE MATERIALS TABLE -->
+  <!-- MANAGE MATERIALS -->
   <div class="admin-card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
-      <div>
-        <h3 style="font-size:1.25rem; font-weight:700;">Uploaded Materials ({{ materials|length }})</h3>
-        <p style="font-size:0.82rem; color:var(--text-muted);">View, edit metadata, test links, or remove files from GCS.</p>
-      </div>
+    <div style="margin-bottom:1.25rem;">
+      <h3 style="font-size:1.15rem; font-weight:700;">Uploaded Materials ({{ materials|length }})</h3>
+      <p style="font-size:0.78rem; color:var(--text-muted);">Manage, edit, or delete notes.</p>
     </div>
 
     {% if materials %}
+      <!-- Mobile View: Clean Action Cards -->
+      <div class="admin-mobile-cards">
+        {% for m in materials %}
+          <div class="admin-item-card">
+            <div class="admin-item-header">
+              <div>
+                <strong style="font-size:0.95rem; color:var(--text-main); display:block; line-height:1.3;">{{ m.title }}</strong>
+                <span style="font-size:0.78rem; color:var(--primary-dark); font-weight:600;">{{ m.chapter }}</span>
+              </div>
+              {% if m.is_pinned %}
+                <span class="pin-badge" style="position:static; font-size:0.65rem; padding:0.15rem 0.45rem;">★ Pinned</span>
+              {% endif %}
+            </div>
+
+            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+              <span class="grade-badge">{{ m.grade }}</span>
+              <span class="category-badge">{{ m.category }}</span>
+              <span class="file-pill">{{ m.file_type }} &bull; {{ m.file_size }}</span>
+              <span style="font-size:0.72rem; color:var(--text-muted); align-self:center;">&bull; <strong>{{ m.download_count }}</strong> downloads</span>
+            </div>
+
+            <div class="admin-item-actions">
+              <a href="{{ url_for('preview_material', material_id=m.id) }}" target="_blank" class="btn btn-secondary btn-sm" title="Preview File">
+                Preview
+              </a>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openEditModal({{ m.id }}, '{{ m.title|replace('\'', '\\\'') }}', '{{ m.grade }}', '{{ m.chapter|replace('\'', '\\\'') }}', '{{ m.category }}', '{{ (m.description or '')|replace('\'', '\\\'')|replace('\n', ' ') }}', '{{ m.is_pinned }}')">
+                Edit
+              </button>
+              <form method="POST" action="{{ url_for('admin_toggle_pin', material_id=m.id) }}" style="display:contents;">
+                <button type="submit" class="btn btn-sm {% if m.is_pinned %}btn-primary{% else %}btn-secondary{% endif %}">
+                  {% if m.is_pinned %}Unpin{% else %}Pin{% endif %}
+                </button>
+              </form>
+              <form method="POST" action="{{ url_for('admin_delete_material', material_id=m.id) }}" onsubmit="return confirm('Delete material permanently from GCS?')" style="grid-column: 1 / -1; margin-top:0.25rem;">
+                <button type="submit" class="btn btn-danger btn-sm" style="width:100%;">
+                  Delete File
+                </button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Desktop Table View -->
       <div class="table-responsive">
         <table class="admin-table">
           <thead>
@@ -174,7 +217,7 @@
                 </td>
                 <td>
                   <form method="POST" action="{{ url_for('admin_toggle_pin', material_id=m.id) }}" style="display:inline;">
-                    <button type="submit" class="btn btn-sm {% if m.is_pinned %}btn-primary{% else %}btn-secondary{% endif %}" title="Toggle Pin">
+                    <button type="submit" class="btn btn-sm {% if m.is_pinned %}btn-primary{% else %}btn-secondary{% endif %}">
                       {% if m.is_pinned %}&#9733; Pinned{% else %}&#9734; Normal{% endif %}
                     </button>
                   </form>
@@ -185,7 +228,7 @@
                       &#128065;
                     </a>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="openEditModal({{ m.id }}, '{{ m.title|replace('\'', '\\\'') }}', '{{ m.grade }}', '{{ m.chapter|replace('\'', '\\\'') }}', '{{ m.category }}', '{{ (m.description or '')|replace('\'', '\\\'')|replace('\n', ' ') }}', '{{ m.is_pinned }}')">
-                      &#9998; Edit
+                      Edit
                     </button>
                     <form method="POST" action="{{ url_for('admin_delete_material', material_id=m.id) }}" onsubmit="return confirm('Are you sure you want to delete this material and its file from GCS bucket?')" style="display:inline;">
                       <button type="submit" class="btn btn-danger btn-sm" title="Delete">
@@ -200,29 +243,29 @@
         </table>
       </div>
     {% else %}
-      <div class="empty-state" style="padding:2.5rem 1rem;">
-        <p style="color:var(--text-muted);">No materials uploaded yet. Use the form above to add your first study material!</p>
+      <div class="empty-state" style="padding:2rem 1rem;">
+        <p style="color:var(--text-muted); font-size:0.9rem;">No materials uploaded yet. Use the form above to add your first study material!</p>
       </div>
     {% endif %}
   </div>
 
-  <!-- ANNOUNCEMENTS & PASSWORD SETTINGS (2 COLUMNS) -->
-  <div style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:1.5rem;">
+  <!-- ANNOUNCEMENTS & PASSWORD SETTINGS -->
+  <div class="admin-columns-layout">
     
     <!-- Announcements Manager -->
     <div class="admin-card">
-      <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+      <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.45rem;">
         <span>&#128227;</span> Notice Board / Announcements
       </h3>
       
-      <form method="POST" action="{{ url_for('admin_add_announcement') }}" style="margin-bottom:1.5rem; background:#f8fafc; padding:1rem; border-radius:var(--radius-md); border:1px solid var(--light-border);">
+      <form method="POST" action="{{ url_for('admin_add_announcement') }}" style="margin-bottom:1.25rem; background:#f8fafc; padding:0.85rem; border-radius:var(--radius-md); border:1px solid var(--light-border);">
         <div class="form-group">
           <label class="form-label" for="ann-title">Notice Title</label>
-          <input type="text" id="ann-title" name="title" class="form-control" placeholder="e.g., Weekly Doubt Session Schedule" required>
+          <input type="text" id="ann-title" name="title" class="form-control" placeholder="e.g., Weekly Test on Sunday" required>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="ann-badge">Badge Label</label>
+            <label class="form-label" for="ann-badge">Badge</label>
             <select id="ann-badge" name="badge" class="form-select">
               <option value="Important">Important</option>
               <option value="Exam Alert">Exam Alert</option>
@@ -232,26 +275,26 @@
           </div>
           <div class="form-group">
             <label class="form-label" for="ann-link">Link URL (Optional)</label>
-            <input type="text" id="ann-link" name="link_url" class="form-control" placeholder="#materials or external link">
+            <input type="text" id="ann-link" name="link_url" class="form-control" placeholder="#materials">
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label" for="ann-content">Notice Message</label>
-          <textarea id="ann-content" name="content" class="form-textarea" rows="2" placeholder="Details of the announcement..." required></textarea>
+          <label class="form-label" for="ann-content">Message</label>
+          <textarea id="ann-content" name="content" class="form-textarea" rows="2" placeholder="Announcement text..." required></textarea>
         </div>
-        <button type="submit" class="btn btn-primary btn-sm">Publish Notice</button>
+        <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">Publish Notice</button>
       </form>
 
-      <h4 style="font-size:0.9rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.75rem;">Active Notices</h4>
+      <h4 style="font-size:0.82rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.65rem;">Active Notices</h4>
       {% for ann in announcements %}
-        <div style="background:white; border:1px solid var(--light-border); border-radius:var(--radius-sm); padding:0.75rem 1rem; margin-bottom:0.75rem; display:flex; justify-content:space-between; align-items:center;">
+        <div style="background:white; border:1px solid var(--light-border); border-radius:var(--radius-sm); padding:0.65rem 0.85rem; margin-bottom:0.6rem; display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">
           <div>
-            <span class="ann-tag" style="background:#047857; color:white; font-size:0.7rem;">{{ ann.badge }}</span>
-            <strong style="margin-left:0.4rem; font-size:0.9rem;">{{ ann.title }}</strong>
-            <p style="font-size:0.82rem; color:var(--text-muted); margin-top:0.2rem;">{{ ann.content }}</p>
+            <span class="ann-tag" style="background:#047857; color:white; font-size:0.68rem;">{{ ann.badge }}</span>
+            <strong style="margin-left:0.35rem; font-size:0.85rem;">{{ ann.title }}</strong>
+            <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.2rem;">{{ ann.content }}</p>
           </div>
-          <form method="POST" action="{{ url_for('admin_delete_announcement', ann_id=ann.id) }}" style="margin-left:1rem;">
-            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Remove announcement?');" style="padding:0.25rem 0.6rem;">&times;</button>
+          <form method="POST" action="{{ url_for('admin_delete_announcement', ann_id=ann.id) }}" style="flex-shrink:0;">
+            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Remove notice?');" style="min-height:32px; padding:0.2rem 0.5rem;">&times;</button>
           </form>
         </div>
       {% endfor %}
@@ -259,8 +302,8 @@
 
     <!-- Password Settings -->
     <div class="admin-card">
-      <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
-        <span>&#128274;</span> Change Teacher Password
+      <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.45rem;">
+        <span>&#128274;</span> Change Password
       </h3>
       <form method="POST" action="{{ url_for('admin_change_password') }}">
         <div class="form-group">
@@ -268,10 +311,10 @@
           <input type="password" id="new_password" name="new_password" class="form-control" placeholder="Min 6 characters" required>
         </div>
         <div class="form-group">
-          <label class="form-label" for="confirm_password">Confirm New Password</label>
-          <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Re-enter new password" required>
+          <label class="form-label" for="confirm_password">Confirm Password</label>
+          <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Re-enter password" required>
         </div>
-        <button type="submit" class="btn btn-secondary btn-sm" style="width:100%;">Update Password</button>
+        <button type="submit" class="btn btn-secondary btn-sm" style="width:100%; min-height:44px;">Update Password</button>
       </form>
     </div>
 
@@ -282,9 +325,9 @@
 <!-- EDIT MATERIAL MODAL -->
 <div id="editModal" class="modal-overlay">
   <div class="modal-box">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-      <h3 style="font-size:1.25rem; font-weight:700;">Edit Material Details</h3>
-      <button type="button" onclick="closeModal('editModal')" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-muted);">&times;</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+      <h3 style="font-size:1.15rem; font-weight:700;">Edit Material</h3>
+      <button type="button" onclick="closeModal('editModal')" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-muted); padding:0.2rem 0.5rem;">&times;</button>
     </div>
 
     <form id="edit-material-form" method="POST" enctype="multipart/form-data">
@@ -316,7 +359,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="edit-chapter">Unit / Chapter *</label>
+        <label class="form-label" for="edit-chapter">Chapter / Topic *</label>
         <input type="text" id="edit-chapter" name="chapter" class="form-control" required>
       </div>
 
@@ -326,18 +369,18 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Replace File (Leave blank to keep existing file)</label>
+        <label class="form-label">Replace File (Optional)</label>
         <input type="file" name="file" class="form-control" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png">
       </div>
 
-      <div class="form-group" style="margin-top:1rem;">
-        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:600;">
+      <div class="form-group" style="margin-top:0.75rem;">
+        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:600; font-size:0.85rem;">
           <input type="checkbox" id="edit-pinned" name="is_pinned" value="1">
           <span>Featured / Pinned to Top</span>
         </label>
       </div>
 
-      <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem;">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.65rem; margin-top:1.25rem;">
         <button type="button" class="btn btn-secondary" onclick="closeModal('editModal')">Cancel</button>
         <button type="submit" class="btn btn-primary">Save Changes</button>
       </div>
