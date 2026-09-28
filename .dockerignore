@@ -1,0 +1,16 @@
+.git
+.gitignore
+.env
+gcp_creds.json
+*creds*.json
+*credentials*.json
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.db
+*.sqlite3
+instance/
+.DS_Store
+.vscode/
+.idea/

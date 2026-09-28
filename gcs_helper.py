@@ -1,22 +1,33 @@
 import os
 import uuid
 import datetime
+import google.auth
 from werkzeug.utils import secure_filename
 from google.cloud import storage
 
 # Configurations
 GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME", "pika-wil")
 GCS_FOLDER_PREFIX = os.getenv("GCS_FOLDER_PREFIX", "ksr-biology").strip("/")
-CREDS_FILE = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "gcp_creds.json")
+CREDS_FILE = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
 _gcs_client = None
 
 def get_storage_client():
+    """
+    Returns a Google Cloud Storage Client.
+    Prioritizes explicit GOOGLE_APPLICATION_CREDENTIALS file if present and valid;
+    otherwise seamlessly falls back to Application Default Credentials (Cloud Run, GCE, App Engine).
+    """
     global _gcs_client
     if _gcs_client is None:
-        if os.path.exists(CREDS_FILE):
-            _gcs_client = storage.Client.from_service_account_json(CREDS_FILE)
+        if CREDS_FILE and os.path.isfile(CREDS_FILE):
+            try:
+                _gcs_client = storage.Client.from_service_account_json(CREDS_FILE)
+            except Exception as e:
+                print(f"Warning: Failed loading credentials from {CREDS_FILE}: {e}. Falling back to default credentials.")
+                _gcs_client = storage.Client()
         else:
+            # Default GCP Application Default Credentials (ADC) for Cloud Run / GCF / GKE
             _gcs_client = storage.Client()
     return _gcs_client
 
@@ -39,7 +50,6 @@ def upload_file_to_gcs(file_storage, folder="materials"):
     original_filename = secure_filename(file_storage.filename) or "material.pdf"
     ext = os.path.splitext(original_filename)[1].lower().replace(".", "").upper() or "PDF"
     
-    # Generate unique blob name under the designated folder prefix
     unique_id = uuid.uuid4().hex[:8]
     sanitized_name = f"{unique_id}_{original_filename}"
     blob_name = f"{GCS_FOLDER_PREFIX}/{folder}/{sanitized_name}"
@@ -47,7 +57,6 @@ def upload_file_to_gcs(file_storage, folder="materials"):
     bucket = get_bucket()
     blob = bucket.blob(blob_name)
     
-    # Read file data to get content-type and size
     file_storage.seek(0, os.SEEK_END)
     file_size = file_storage.tell()
     file_storage.seek(0)
@@ -72,10 +81,13 @@ def upload_file_to_gcs(file_storage, folder="materials"):
 
 def generate_signed_url(blob_name, disposition="inline", download_name=None, minutes=60):
     """
-    Generates a secure GCS v4 signed URL for inline preview or attachment download.
+    Generates a secure GCS v4 signed URL.
+    Returns None if signed URL cannot be generated (e.g., when running under certain ADC scopes),
+    prompting the caller to use the direct stream fallback.
     """
     try:
-        bucket = get_bucket()
+        client = get_storage_client()
+        bucket = client.bucket(GCS_BUCKET_NAME)
         blob = bucket.blob(blob_name)
         
         response_disposition = disposition
@@ -86,6 +98,7 @@ def generate_signed_url(blob_name, disposition="inline", download_name=None, min
             safe_download_name = secure_filename(download_name)
             response_disposition = f'inline; filename="{safe_download_name}"'
 
+        # Attempt standard signed URL generation
         url = blob.generate_signed_url(
             version="v4",
             expiration=datetime.timedelta(minutes=minutes),
@@ -94,8 +107,22 @@ def generate_signed_url(blob_name, disposition="inline", download_name=None, min
         )
         return url
     except Exception as e:
-        print(f"Error generating signed URL for {blob_name}: {e}")
+        print(f"Signed URL not directly available ({e}). Using direct GCS streaming proxy.")
         return None
+
+def get_blob_stream(blob_name):
+    """
+    Returns (open_file_handle, content_type, size) for streaming directly from GCS via Flask.
+    """
+    try:
+        bucket = get_bucket()
+        blob = bucket.blob(blob_name)
+        if blob.exists():
+            blob.reload()
+            return blob.open("rb"), blob.content_type or "application/octet-stream", blob.size
+    except Exception as e:
+        print(f"Error opening blob stream for {blob_name}: {e}")
+    return None, None, None
 
 def delete_file_from_gcs(blob_name):
     """

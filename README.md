@@ -10,7 +10,7 @@ A minimalistic, modern, and high-performance Flask web portal for biology educat
 * **Zero Friction Access:** Instant browsing with no student login or signup barriers.
 * **Smart Filter Pills:** Filter materials by Grade (`Class 9`, `Class 10`, `Class 11`, `Class 12`, `NEET / Foundation`) and Resource Type (`Revision Notes`, `Question Bank & PYQs`, `Diagrams & Mind Maps`, `Worksheets & Practice`).
 * **Real-time Instant Search:** Filter materials on-the-fly by topic, chapter, or keywords.
-* **1-Click High-Speed Downloads:** Direct GCS v4 Signed URLs ensuring instant, reliable downloads.
+* **1-Click High-Speed Downloads:** Direct GCS v4 Signed URLs or Cloud Run GCS streaming fallback.
 * **Live In-Browser Preview:** Instant PDF preview in one click.
 * **Live Announcement Ticker:** Real-time exam notifications, schedule alerts, and test updates.
 * **WhatsApp Doubt Support:** 1-click button for students to connect directly with the teacher.
@@ -25,16 +25,36 @@ A minimalistic, modern, and high-performance Flask web portal for biology educat
 
 ---
 
-## 🚀 Quick Start
+## ☁️ Deploying to Google Cloud Run
+
+The application is fully configured for **Google Cloud Run** using native **Application Default Credentials (ADC)** — no service account JSON key file is needed on Cloud Run!
+
+### Option A: One-Command Deployment via `deploy.sh`
+```bash
+./deploy.sh
+```
+
+### Option B: Deploy directly using `gcloud`
+```bash
+gcloud run deploy ksrbiology \
+  --source . \
+  --region asia-south1 \
+  --platform managed \
+  --allow-unauthenticated \
+  --set-env-vars="GCS_BUCKET_NAME=pika-wil,GCS_FOLDER_PREFIX=ksr-biology,ADMIN_PASSWORD=ksradmin2026,SECRET_KEY=ksr-biology-cloud-run-key-2026"
+```
+
+> **Note:** Ensure your Cloud Run runtime service account (e.g. `PROJECT_NUMBER-compute@developer.gserviceaccount.com` or custom service account) has the **Storage Object Admin** role on the bucket `pika-wil`.
+
+---
+
+## 💻 Local Development
 
 ### 1. Requirements & Setup
-Make sure you have Python 3.10+ installed.
-
 ```bash
-# Clone or navigate to the project directory
 cd /Users/sathishkumardm/Pikachooz2.0/ksrbiology
 
-# Activate the existing virtual environment or create one
+# Activate the virtual environment
 source venv/bin/activate
 
 # Install dependencies
@@ -42,7 +62,7 @@ pip install -r requirements.txt
 ```
 
 ### 2. Environment Variables (`.env`)
-The `.env` file is already configured with your Google Cloud credentials:
+For local development, copy `.env.example` to `.env`:
 ```env
 GOOGLE_APPLICATION_CREDENTIALS=gcp_creds.json
 GCS_BUCKET_NAME=pika-wil
@@ -51,7 +71,7 @@ ADMIN_PASSWORD=ksradmin2026
 SECRET_KEY=ksr-biology-super-secure-key-2026
 ```
 
-### 3. Run the App
+### 3. Run Locally
 ```bash
 ./run.sh
 ```
@@ -68,13 +88,17 @@ python3 app.py
 ## 📁 Directory Structure
 ```
 ksrbiology/
-├── .env                  # GCP credentials and app secrets
-├── gcp_creds.json        # Google Cloud Service Account credentials
-├── app.py                # Flask routes, authentication, APIs
-├── models.py             # SQLite / SQLAlchemy data models
-├── gcs_helper.py         # Google Cloud Storage upload & signed URL helper
+├── .env.example          # Environment variables template
+├── .gitignore            # Git ignore (excludes credentials & DB)
+├── .dockerignore         # Docker ignore for lean containers
+├── Dockerfile            # Production multi-threaded Gunicorn image
+├── deploy.sh             # 1-Click Cloud Run deploy script
+├── README.md             # Documentation
+├── app.py                # Flask application, routes, APIs
+├── models.py             # SQLAlchemy models & schema
+├── gcs_helper.py         # GCS upload, signed URLs, and Cloud Run ADC fallback
 ├── requirements.txt      # Python dependencies
-├── run.sh                # Quick start script
+├── run.sh                # Local startup script
 ├── static/
 │   ├── css/
 │   │   └── style.css     # Modern responsive design & theme

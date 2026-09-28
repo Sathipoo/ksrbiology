@@ -4,16 +4,16 @@ from datetime import datetime
 from dotenv import load_dotenv
 from flask import (
     Flask, render_template, request, redirect, url_for,
-    flash, session, jsonify, abort
+    flash, session, jsonify, abort, send_file, Response
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# Load environment variables
+# Load environment variables if .env exists
 load_dotenv()
 
 from models import db, Material, Announcement, AdminConfig
 from gcs_helper import (
-    upload_file_to_gcs, generate_signed_url, delete_file_from_gcs,
+    upload_file_to_gcs, generate_signed_url, get_blob_stream, delete_file_from_gcs,
     GCS_BUCKET_NAME, GCS_FOLDER_PREFIX
 )
 
@@ -37,45 +37,43 @@ def admin_required(f):
 
 # Prepopulate database with initial config and demo content if empty
 def seed_initial_data():
-    # 1. Admin Password Config
-    default_pass = os.getenv("ADMIN_PASSWORD", "ksradmin2026")
-    admin_pw_entry = AdminConfig.query.filter_by(key="admin_password_hash").first()
-    if not admin_pw_entry:
-        hashed = generate_password_hash(default_pass)
-        db.session.add(AdminConfig(key="admin_password_hash", value=hashed))
-        db.session.commit()
-        
-    # 2. Sample Announcements
-    if Announcement.query.count() == 0:
-        db.session.add(Announcement(
-            title="NEET 2027 Rapid Revision Series Launched!",
-            content="Check out the newly added High-Yield Genetics & Ecology Mind Maps under the Class 12 & NEET tabs.",
-            badge="Exam Alert",
-            link_url="#materials"
-        ))
-        db.session.add(Announcement(
-            title="Class 10 CBSE Board Term-2 Sample Papers Available",
-            content="Complete solution sheet with marking schemes has been uploaded.",
-            badge="New Notes",
-            link_url="#materials"
-        ))
-        db.session.commit()
+    try:
+        # 1. Admin Password Config
+        default_pass = os.getenv("ADMIN_PASSWORD", "ksradmin2026")
+        admin_pw_entry = AdminConfig.query.filter_by(key="admin_password_hash").first()
+        if not admin_pw_entry:
+            hashed = generate_password_hash(default_pass)
+            db.session.add(AdminConfig(key="admin_password_hash", value=hashed))
+            db.session.commit()
+            
+        # 2. Sample Announcements
+        if Announcement.query.count() == 0:
+            db.session.add(Announcement(
+                title="NEET 2027 Rapid Revision Series Launched!",
+                content="Check out the newly added High-Yield Genetics & Ecology Mind Maps under the Class 12 & NEET tabs.",
+                badge="Exam Alert",
+                link_url="#materials"
+            ))
+            db.session.add(Announcement(
+                title="Class 10 CBSE Board Term-2 Sample Papers Available",
+                content="Complete solution sheet with marking schemes has been uploaded.",
+                badge="New Notes",
+                link_url="#materials"
+            ))
+            db.session.commit()
+    except Exception as e:
+        print(f"Notice: Data seeding check: {e}")
 
 # --- PUBLIC ROUTES ---
 
 @app.route("/")
 def index():
-    # Fetch active announcements
     announcements = Announcement.query.filter_by(is_active=True).order_by(Announcement.created_at.desc()).all()
-    
-    # Fetch materials (pinned first, then newest)
     materials = Material.query.order_by(Material.is_pinned.desc(), Material.created_at.desc()).all()
     
-    # Extract unique categories and chapters for filter pills
     grades = ["All", "Class 9", "Class 10", "Class 11", "Class 12", "NEET / Foundation"]
     categories = ["All", "Revision Notes", "Question Bank & PYQs", "Diagrams & Mind Maps", "Worksheets & Practice"]
     
-    # Calculate stats
     total_materials = len(materials)
     total_downloads = sum(m.download_count for m in materials)
     total_chapters = len(set(m.chapter for m in materials if m.chapter))
@@ -124,34 +122,52 @@ def download_material(material_id):
     material.download_count += 1
     db.session.commit()
     
-    # Generate GCS signed download URL (forces download as original filename)
+    # 1. Attempt GCS Signed URL redirect
     signed_url = generate_signed_url(
         material.gcs_blob_name,
         disposition="attachment",
         download_name=material.filename,
         minutes=30
     )
-    
     if signed_url:
         return redirect(signed_url)
     
-    flash("Error generating download link. Please try again or contact teacher.", "danger")
+    # 2. Cloud Run ADC Fallback: Stream directly from GCS blob
+    stream, content_type, size = get_blob_stream(material.gcs_blob_name)
+    if stream:
+        return send_file(
+            stream,
+            mimetype=content_type,
+            as_attachment=True,
+            download_name=material.filename
+        )
+    
+    flash("Error retrieving file. Please try again later.", "danger")
     return redirect(url_for("index"))
 
 @app.route("/preview/<int:material_id>")
 def preview_material(material_id):
     material = Material.query.get_or_404(material_id)
     
-    # Generate GCS signed inline preview URL (opens in browser PDF viewer)
+    # 1. Attempt GCS Signed URL redirect
     signed_url = generate_signed_url(
         material.gcs_blob_name,
         disposition="inline",
         download_name=material.filename,
         minutes=60
     )
-    
     if signed_url:
         return redirect(signed_url)
+    
+    # 2. Cloud Run ADC Fallback: Stream directly from GCS blob inline
+    stream, content_type, size = get_blob_stream(material.gcs_blob_name)
+    if stream:
+        return send_file(
+            stream,
+            mimetype=content_type,
+            as_attachment=False,
+            download_name=material.filename
+        )
     
     flash("Unable to load preview for this file.", "warning")
     return redirect(url_for("index"))
@@ -228,10 +244,8 @@ def admin_upload():
         return redirect(url_for("admin_dashboard"))
         
     try:
-        # Upload to Google Cloud Storage
         gcs_info = upload_file_to_gcs(file, folder="materials")
         
-        # Save to Database
         new_material = Material(
             title=title,
             grade=grade,
@@ -275,12 +289,9 @@ def admin_edit_material(material_id):
     material.description = request.form.get("description", "").strip()
     material.is_pinned = bool(request.form.get("is_pinned"))
     
-    # Optional replace file
     new_file = request.files.get("file")
     if new_file and new_file.filename:
-        # Delete old blob
         delete_file_from_gcs(material.gcs_blob_name)
-        # Upload new blob
         gcs_info = upload_file_to_gcs(new_file, folder="materials")
         material.filename = gcs_info["original_filename"]
         material.gcs_blob_name = gcs_info["blob_name"]
@@ -297,10 +308,7 @@ def admin_delete_material(material_id):
     material = Material.query.get_or_404(material_id)
     blob_name = material.gcs_blob_name
     
-    # Delete from GCS
     delete_file_from_gcs(blob_name)
-    
-    # Delete from DB
     db.session.delete(material)
     db.session.commit()
     flash(f"Material '{material.title}' deleted from GCS and database.", "success")
@@ -364,10 +372,15 @@ def admin_change_password():
     flash("Admin password updated successfully!", "success")
     return redirect(url_for("admin_dashboard"))
 
-# --- CLI COMMAND FOR CREATING TABLES & SAMPLE DATA ---
+@app.route("/healthz")
+def healthz():
+    return jsonify({"status": "healthy", "time": datetime.utcnow().isoformat()}), 200
+
+# Initialize DB tables
 with app.app_context():
     db.create_all()
     seed_initial_data()
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001, host="0.0.0.0")
+    port = int(os.environ.get("PORT", 5001))
+    app.run(debug=True, port=port, host="0.0.0.0")
