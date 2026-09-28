@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}KSR Biology | Digital Learning Portal{% endblock %}</title>
+  
+  <!-- Modern Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- CSS Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="{{ url_for('index') }}" class="brand-logo">
+        <div class="brand-icon">
+          <!-- DNA / Leaf Biology Icon -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 15c6.667-6 13.333 0 20-6"></path>
+            <path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"></path>
+            <path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"></path>
+            <path d="M17 6l3-3"></path>
+            <path d="M4 18l3 3"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>KSR Biology</h1>
+          <span>Learning & Resource Hub</span>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        {% if session.get('admin_logged_in') %}
+          <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-primary btn-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            Teacher Dashboard
+          </a>
+          <a href="{{ url_for('admin_logout') }}" class="btn btn-secondary btn-sm">Sign Out</a>
+        {% else %}
+          <a href="#materials" class="btn btn-primary btn-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Study Materials
+          </a>
+          <a href="{{ url_for('admin_login') }}" class="btn btn-secondary btn-sm">Teacher Login</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash Messages Alert Bar -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash-alert flash-{{ category }}">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;font-weight:bold;font-size:1.1rem;color:inherit;">&times;</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Page Body Content -->
+  {% block content %}{% endblock %}
+
+  <!-- Global Footer -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-brand">
+        <p><strong>KSR Biology Academy</strong> &copy; 2026. Empowering Biology Students.</p>
+        <p style="font-size:0.8rem; margin-top:0.25rem;">Cloud Storage backed by Google Cloud Platform ({{ bucket_name or 'GCS' }}).</p>
+      </div>
+      <div class="footer-links">
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="#materials">Notes & Question Banks</a>
+        <a href="{{ url_for('admin_login') }}">Teacher Access</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

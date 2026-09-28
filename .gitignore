@@ -1,0 +1,25 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment Variables & GCP Service Account Credentials (Never commit secrets)
+.env
+gcp_creds.json
+*creds*.json
+*credentials*.json
+
+# SQLite Database & Instance files
+instance/
+*.db
+*.sqlite3
+
+# OS / Editor files
+.DS_Store
+.vscode/
+.idea/
