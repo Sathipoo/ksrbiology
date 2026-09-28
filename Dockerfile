@@ -24,5 +24,5 @@ COPY . .
 # Expose the default Cloud Run port
 EXPOSE 8080
 
-# Run with Gunicorn on dynamic $PORT
-CMD exec gunicorn --bind :$PORT --workers 2 --threads 8 --timeout 0 app:app
+# Run with Gunicorn (1 worker with 8 concurrent threads prevents SQLite startup race conditions)
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 app:app

@@ -35,7 +35,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Prepopulate database with initial config and demo content if empty
+# Prepopulate database with initial config and demo content safely
 def seed_initial_data():
     try:
         # 1. Admin Password Config
@@ -45,7 +45,11 @@ def seed_initial_data():
             hashed = generate_password_hash(default_pass)
             db.session.add(AdminConfig(key="admin_password_hash", value=hashed))
             db.session.commit()
-            
+    except Exception as e:
+        db.session.rollback()
+        print(f"Admin config seed note: {e}")
+        
+    try:
         # 2. Sample Announcements
         if Announcement.query.count() == 0:
             db.session.add(Announcement(
@@ -62,7 +66,18 @@ def seed_initial_data():
             ))
             db.session.commit()
     except Exception as e:
-        print(f"Notice: Data seeding check: {e}")
+        db.session.rollback()
+        print(f"Announcement seed note: {e}")
+
+# Safe Database Initialization Function
+def safe_init_db():
+    with app.app_context():
+        try:
+            db.create_all()
+        except Exception as e:
+            # Table already created or concurrency race condition
+            print(f"Database schema already initialized or notice: {e}")
+        seed_initial_data()
 
 # --- PUBLIC ROUTES ---
 
@@ -376,10 +391,8 @@ def admin_change_password():
 def healthz():
     return jsonify({"status": "healthy", "time": datetime.utcnow().isoformat()}), 200
 
-# Initialize DB tables
-with app.app_context():
-    db.create_all()
-    seed_initial_data()
+# Initialize DB tables safely
+safe_init_db()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
