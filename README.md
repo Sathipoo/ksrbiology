@@ -13,7 +13,6 @@ A minimalistic, modern, and high-performance Flask web portal for biology educat
 * **1-Click High-Speed Downloads:** Direct GCS v4 Signed URLs or Cloud Run GCS streaming fallback.
 * **Live In-Browser Preview:** Instant PDF preview in one click.
 * **Live Announcement Ticker:** Real-time exam notifications, schedule alerts, and test updates.
-* **WhatsApp Doubt Support:** 1-click button for students to connect directly with the teacher.
 
 ### 👩‍🏫 Teacher Admin Dashboard (`/admin`)
 * **Secure Single-Teacher Authentication:** Simple PIN/Password login (`ksradmin2026` by default).
